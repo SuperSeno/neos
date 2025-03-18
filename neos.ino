@@ -78,12 +78,11 @@ void setup() {
   // Create a White Line Inside the Left Box, on the Right Edge
   lv_obj_t *right_line = lv_line_create(scr);
   // Move the line a lot higher (50 units higher from before)
-  static lv_point_t line_points[2] = {{27, 1}, {27, 206}};  // Moved 50 units higher
+  static lv_point_t line_points[2] = {{25, 1}, {25, 206}};  // Moved 50 units higher
   lv_line_set_points(right_line, line_points, 2);
   lv_obj_set_style_line_width(right_line, 3, LV_PART_MAIN); // Line width same as the right bar outline
   lv_obj_set_style_line_color(right_line, lv_color_white(), LV_PART_MAIN); // White color
   lv_obj_align(right_line, LV_ALIGN_LEFT_MID, 22, 0); // Moved line further to the right (1 unit more) and higher
-
   // Initialize SD card using the TFT SPI instance
   Serial.println("Initializing SD card...");
   
