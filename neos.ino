@@ -4,6 +4,7 @@
 #include <SD.h>
 #include "touch.h"
 
+
 // Define rotation constants if not defined in touch.h
 #ifndef ROTATION_NORMAL
   #define ROTATION_NORMAL   0
@@ -63,24 +64,24 @@ void setup() {
 
     // Initialize TFT display
     tft.init();
-    tft.setRotation(1);
+    tft.setRotation(0); // Portrait mode (0 degrees rotation)
 
     // Initialize LVGL
     lv_init();
 
     // Initialize touch with updated parameters
-    touch_init(480, 320, ROTATION_NORMAL);
+    touch_init(320, 480, ROTATION_NORMAL); // Portrait dimensions: 320x480
 
     // Create Display Buffer
-    static lv_color_t buf[480 * 10];  
+    static lv_color_t buf[320 * 10];  // Buffer size for portrait width
     static lv_disp_draw_buf_t draw_buf;
-    lv_disp_draw_buf_init(&draw_buf, buf, NULL, 480 * 10);
+    lv_disp_draw_buf_init(&draw_buf, buf, NULL, 320 * 10);
 
     // Register Display Driver
     static lv_disp_drv_t disp_drv;
     lv_disp_drv_init(&disp_drv);
-    disp_drv.hor_res = 480;
-    disp_drv.ver_res = 320;
+    disp_drv.hor_res = 320; // Portrait width
+    disp_drv.ver_res = 480; // Portrait height
     disp_drv.flush_cb = my_disp_flush;
     disp_drv.draw_buf = &draw_buf;
     lv_disp_drv_register(&disp_drv); 
@@ -99,16 +100,16 @@ void setup() {
     lv_obj_t *scr = lv_scr_act(); 
     lv_obj_set_style_bg_color(scr, lv_color_black(), LV_PART_MAIN);
 
-    // Create the touch-sensitive button in the middle
+    // Create the touch-sensitive button in the middle, now horizontal (swapped dimensions)
     lv_obj_t *btn = lv_btn_create(scr);
-    lv_obj_set_size(btn, 50, 100); // Change size to 50 wide and 100 tall
+    lv_obj_set_size(btn, 100, 50); // Swapped from 50x100 to 100x50 for horizontal orientation
     lv_obj_center(btn); // Center the button
     lv_obj_add_event_cb(btn, btn_event_cb, LV_EVENT_CLICKED, NULL);
 
-    // Create a Rounded Bar Outline on the Right (Wider Bar)
+    // Create a Rounded Bar Outline on the Bottom
     lv_obj_t *rounded_bar = lv_obj_create(scr);
-    lv_obj_set_size(rounded_bar, 80, 300); // Make the bar 80 wide and 300 tall
-    lv_obj_align(rounded_bar, LV_ALIGN_RIGHT_MID, -30, 0); // Slightly move top bar to the right
+    lv_obj_set_size(rounded_bar, 300, 80); // 300 wide and 80 tall for bottom bar
+    lv_obj_align(rounded_bar, LV_ALIGN_BOTTOM_MID, 0, -30); // Position at bottom with 30px margin
     lv_obj_set_style_radius(rounded_bar, 20, LV_PART_MAIN); // Rounded corners
     lv_obj_set_style_bg_color(rounded_bar, lv_color_hex(0x1F1F1F), LV_PART_MAIN); // Darker shade
     lv_obj_set_style_bg_opa(rounded_bar, LV_OPA_COVER, LV_PART_MAIN); // Fully opaque background
@@ -117,11 +118,11 @@ void setup() {
     // Ensure no padding
     lv_obj_set_style_pad_all(rounded_bar, 0, LV_PART_MAIN);  // Remove all padding
 
-    // Add three rounded boxes inside the bottom/right bar
+    // Add three rounded boxes inside the bottom bar (horizontally aligned)
     // First rounded box
     lv_obj_t *round_box1 = lv_obj_create(rounded_bar);
     lv_obj_set_size(round_box1, 50, 50); // 50x50 pixel box
-    lv_obj_align(round_box1, LV_ALIGN_TOP_MID, 0, 30); // Position near top of bar
+    lv_obj_align(round_box1, LV_ALIGN_LEFT_MID, 30, 0); // Position near left of bar
     lv_obj_set_style_radius(round_box1, 10, LV_PART_MAIN); // Slightly rounded corners
     lv_obj_set_style_border_color(round_box1, lv_color_white(), LV_PART_MAIN); // White border
     lv_obj_set_style_border_width(round_box1, 2, LV_PART_MAIN); // 2px border width
@@ -141,7 +142,7 @@ void setup() {
     // Third rounded box
     lv_obj_t *round_box3 = lv_obj_create(rounded_bar);
     lv_obj_set_size(round_box3, 50, 50); // 50x50 pixel box
-    lv_obj_align(round_box3, LV_ALIGN_BOTTOM_MID, 0, -30); // Position near bottom of bar
+    lv_obj_align(round_box3, LV_ALIGN_RIGHT_MID, -30, 0); // Position near right of bar
     lv_obj_set_style_radius(round_box3, 10, LV_PART_MAIN); // Slightly rounded corners
     lv_obj_set_style_border_color(round_box3, lv_color_white(), LV_PART_MAIN); // White border
     lv_obj_set_style_border_width(round_box3, 2, LV_PART_MAIN); // 2px border width
@@ -159,6 +160,34 @@ void setup() {
         return;
     }
     Serial.println("SD Card Initialized Successfully.");
+
+    // List files on SD card in the serial monitor
+    Serial.println("Listing files on SD card:");
+    File root = SD.open("/");
+    printDirectory(root, 0);
+    root.close();
+}
+
+// Function to print files and directories from the SD card
+void printDirectory(File dir, int numTabs) {
+  while (true) {
+    File entry = dir.openNextFile();
+    if (!entry) {
+      break;
+    }
+    for (int i = 0; i < numTabs; i++) {
+      Serial.print("\t");
+    }
+    Serial.print(entry.name());
+    if (entry.isDirectory()) {
+      Serial.println("/");
+      printDirectory(entry, numTabs + 1);
+    } else {
+      Serial.print("\t\t");
+      Serial.println(entry.size(), DEC);
+    }
+    entry.close();
+  }
 }
 
 void loop() {
