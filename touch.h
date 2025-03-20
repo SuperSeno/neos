@@ -1,5 +1,6 @@
 #include <FT6336.h>
 
+
 #define TOUCH_FT6336
 #define TOUCH_FT6336_SCL 35
 #define TOUCH_FT6336_SDA 37
@@ -10,15 +11,19 @@
 #define TOUCH_MAP_Y1 0
 #define TOUCH_MAP_Y2 480
 
+
 // Define this to swap the axes if needed
 #define TOUCH_SWAP_XY
+
 
 int touch_last_x = 0, touch_last_y = 0;
 unsigned short int width = 0, height = 0, rotation, min_x = 0, max_x = 0, min_y = 0, max_y = 0;
 
+
 // Create the FT6336 instance.
 // Note: using max(TOUCH_MAP_X1, TOUCH_MAP_X2) ensures a positive value for the touch sensor dimensions.
 FT6336 ts = FT6336(TOUCH_FT6336_SDA, TOUCH_FT6336_SCL, TOUCH_FT6336_INT, TOUCH_FT6336_RST, max(TOUCH_MAP_X1, TOUCH_MAP_X2), max(TOUCH_MAP_Y1, TOUCH_MAP_Y2));
+
 
 void touch_init(unsigned short int w, unsigned short int h, unsigned char r) {
   width = w;
@@ -45,6 +50,7 @@ void touch_init(unsigned short int w, unsigned short int h, unsigned char r) {
   ts.setRotation(r);
 }
 
+
 bool touch_touched(void) {
   ts.read();
   if (ts.isTouched) {
@@ -67,9 +73,11 @@ bool touch_touched(void) {
   }
 }
 
+
 bool touch_has_signal(void) {
   return true;
 }
+
 
 bool touch_released(void) {
   return true;
